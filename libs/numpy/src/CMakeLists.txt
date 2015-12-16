@@ -17,10 +17,13 @@ add_library(boost_numpy ${LIBRARY_TYPE}
   ufunc.cpp
   numpy.cpp
 )
-target_link_libraries(boost_numpy ${Boost_LIBRARIES} ${PYTHON_LIBRARIES})
+target_link_libraries(boost_numpy
+  ${Boost_LIBRARIES}
+  ${PYTHON_LIBRARIES}
+)
 
 install(TARGETS boost_numpy 
+  EXPORT "${PROJECT_NAME}Targets"
   ARCHIVE DESTINATION lib 
   LIBRARY DESTINATION lib 
-  PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )

@@ -125,6 +125,11 @@ write_basic_package_version_file(
     ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyConfigVersion.cmake
     VERSION 0.24.0
     COMPATIBILITY SameMajorVersion)
+
+install(EXPORT "${PROJECT_NAME}Targets"
+        FILE "BoostNumpyTargets.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/BoostNumpy/cmake")
+
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyConfig.cmake
               ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyConfigVersion.cmake
         DESTINATION ${LIB_INSTALL_DIR}/BoostNumpy/cmake)
