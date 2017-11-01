@@ -31,10 +31,14 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     CACHE PATH "Output directory for executables and DLL's.")
 
+if(NOT BOOST_NUMPY_PYTHON_VERSION)
+  set(BOOST_NUMPY_PYTHON_VERSION 3.4 CACHE STRING "Choose the target Python version (e.g., 3.4, 2.7)" FORCE)
+endif()
+
 # Find required python packages.
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibs REQUIRED)
-find_package(NumPy REQUIRED)
+find_package(PythonInterp ${BOOST_NUMPY_PYTHON_VERSION} REQUIRED)
+find_package(PythonLibs ${BOOST_NUMPY_PYTHON_VERSION} REQUIRED)
+find_package(NumPy ${BOOST_NUMPY_PYTHON_VERSION} REQUIRED)
 
 # Find Boost.
 # 
@@ -45,7 +49,10 @@ set(CMAKE_MACOSX_RPATH 1)
 
 if(${PYTHON_VERSION_STRING} GREATER 3.0)
   message(STATUS "Using Python3")
-  find_package(Boost COMPONENTS python3 REQUIRED)
+  find_package(Boost COMPONENTS python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
+  if (NOT Boost_FOUND)
+    find_package(Boost COMPONENTS python3 REQUIRED)
+  endif()
 else()
   message(STATUS "Using Python2")
   find_package(Boost COMPONENTS python REQUIRED)
