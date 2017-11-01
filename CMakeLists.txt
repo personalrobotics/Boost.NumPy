@@ -1,11 +1,27 @@
-cmake_minimum_required(VERSION 2.8.3)
-project(boost.numpy)
+cmake_minimum_required(VERSION 2.8.12)
 
-# Put our local cmake find scripts at the beginning of the CMake
-# module search path.
+project( boost.numpy )
+
+set(BUILD_TESTS ON CACHE BOOL "Build Boost.NumPy Tests")
+set(BUILD_EXAMPLES ON CACHE BOOL "Build Boost.NumPy Examples")
+
+# put our local cmake find scripts at the beginning of the cmake
+# module search path
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/libs/numpy/cmake ${CMAKE_MODULE_PATH})
 
-# Configure output folders so artifacts are built into a single set of
+IF (NOT DEFINED LIB_SUFFIX)
+	EXECUTE_PROCESS(
+		COMMAND uname -m
+		COMMAND tr -d '\n'
+		OUTPUT_VARIABLE ARCH
+	)
+	message(STATUS "Detected architecture '"  ${ARCH}  "'")
+	IF (ARCH STREQUAL x86_64)
+		SET(LIB_SUFFIX 64)
+	ENDIF (ARCH STREQUAL x86_64)
+ENDIF (NOT DEFINED LIB_SUFFIX)
+
+# configure output folders so artifacts are built into a single set of
 # top-level folders rather than the default cmake build structure that
 # matches the source tree.
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib 
@@ -15,24 +31,48 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
     CACHE PATH "Output directory for executables and DLL's.")
 
+if(NOT BOOST_NUMPY_PYTHON_VERSION)
+  set(BOOST_NUMPY_PYTHON_VERSION 3.4 CACHE STRING "Choose the target Python version (e.g., 3.4, 2.7)" FORCE)
+endif()
+
 # Find required python packages.
-find_package(PythonInterp REQUIRED)
-find_package(PythonLibsNew REQUIRED)
-find_package(NumPy REQUIRED)
+find_package(PythonInterp ${BOOST_NUMPY_PYTHON_VERSION} REQUIRED)
+find_package(PythonLibs ${BOOST_NUMPY_PYTHON_VERSION} REQUIRED)
+find_package(NumPy ${BOOST_NUMPY_PYTHON_VERSION} REQUIRED)
 
 # Find Boost.
 # 
 # set(Boost_USE_STATIC_LIBS ON)
 # set(Boost_USE_MULTITHREADED ON) 
 # set(Boost_USE_STATIC_RUNTIME ON)
-find_package(Boost COMPONENTS python REQUIRED)
+set(CMAKE_MACOSX_RPATH 1)
 
-message( STATUS "found boost:"
-  "\nINCLUDE: ${Boost_INCLUDE_DIRS}"
-  "\nLIB: ${Boost_LIBRARIES}"
-)
+if(${PYTHON_VERSION_STRING} GREATER 3.0)
+  message(STATUS "Using Python3")
+  find_package(Boost COMPONENTS python-py${PYTHON_VERSION_MAJOR}${PYTHON_VERSION_MINOR})
+  if (NOT Boost_FOUND)
+    find_package(Boost COMPONENTS python3 REQUIRED)
+  endif()
+else()
+  message(STATUS "Using Python2")
+  find_package(Boost COMPONENTS python REQUIRED)
+endif()
 
-# add_definitions( -DBOOST_ALL_NO_LIB )
+message( STATUS "Boost Paths:")
+message( STATUS "Include  : " ${Boost_INCLUDE_DIRS})
+message( STATUS "Libraries: " ${Boost_LIBRARIES})
+
+if(MSVC)
+  # With Visual Studio remove the automatic linking
+  # feature
+  add_definitions( -DBOOST_ALL_NO_LIB )
+endif()
+
+if(Boost_USE_STATIC_LIBS)
+  # if the user specified he wants to link to static libraries
+  # force linking to static boost python
+  add_definitions( -DBOOST_PYTHON_STATIC_LIB )
+endif()
 # In some cases, you may need to explicitly specify that a dynamic Boost is used; if so use:
 # add_definitions( -DBOOST_ALL_DYN_LINK )
 
@@ -79,8 +119,10 @@ endif()
 # Compiler definitions for non-Windows builds.
 add_definitions(-fPIC)
 
-# Enable CTest targets.
-enable_testing()
+if (BUILD_TESTS)
+  # enable ctest targets
+  ENABLE_TESTING()
+endif()
 
 # Turn on Visual Studio solution folders.
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -101,10 +143,14 @@ install(DIRECTORY boost
     ${INSTALL_PERMISSIONS_SRC}
   )
 
-# Add submodules.
-add_subdirectory(libs/numpy/src)
-add_subdirectory(libs/numpy/example)
-add_subdirectory(libs/numpy/test)
+# add submodules
+ADD_SUBDIRECTORY(libs/numpy/src)
+if (BUILD_EXAMPLES)
+  ADD_SUBDIRECTORY(libs/numpy/example)
+endif()
+if (BUILD_TESTS)
+  ADD_SUBDIRECTORY(libs/numpy/test)
+endif()
 
 if(BUILD_DOCS)
   add_subdirectory(libs/numpy/doc)

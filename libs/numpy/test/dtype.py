@@ -8,6 +8,7 @@
 import dtype_mod
 import unittest
 import numpy
+import sys
 
 class DtypeTestCase(unittest.TestCase):
     
@@ -27,8 +28,9 @@ class DtypeTestCase(unittest.TestCase):
             self.assertEquivalent(fu(True), numpy.dtype(u))
             self.assertEquivalent(fs(int(1)), numpy.dtype(s))
             self.assertEquivalent(fu(int(1)), numpy.dtype(u))
-            self.assertEquivalent(fs(long(1)), numpy.dtype(s))
-            self.assertEquivalent(fu(long(1)), numpy.dtype(u))
+            if sys.version_info[0] == 2:
+                self.assertEquivalent(fs(long(1)), numpy.dtype(s))
+                self.assertEquivalent(fu(long(1)), numpy.dtype(u))
         for name in ("bool_", "byte", "ubyte", "short", "ushort", "intc", "uintc"):
             t = getattr(numpy, name)
             ft = getattr(dtype_mod, "accept_%s" % name)
@@ -37,7 +39,8 @@ class DtypeTestCase(unittest.TestCase):
             self.assertEquivalent(ft(True), numpy.dtype(t))
             if name != "bool_":
                 self.assertEquivalent(ft(int(1)), numpy.dtype(t))
-                self.assertEquivalent(ft(long(1)), numpy.dtype(t))
+                if sys.version_info[0] == 2:
+                    self.assertEquivalent(ft(long(1)), numpy.dtype(t))
 
 
     def testFloats(self):
@@ -49,7 +52,7 @@ class DtypeTestCase(unittest.TestCase):
         c = numpy.complex128
         self.assertEquivalent(dtype_mod.accept_float64(f(numpy.pi)), numpy.dtype(f))
         self.assertEquivalent(dtype_mod.accept_complex128(c(1+2j)), numpy.dtype(c))
-        if hasattr(numpy, "longdouble"):
+        if hasattr(numpy, "longdouble") and hasattr(dtype_mod, "accept_longdouble"):
             f = numpy.longdouble
             c = numpy.clongdouble
             self.assertEquivalent(dtype_mod.accept_longdouble(f(numpy.pi)), numpy.dtype(f))
