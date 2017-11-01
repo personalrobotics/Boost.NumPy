@@ -18,5 +18,4 @@ script:
   - cd ../libs/numpy/doc
   - make html
   - cd ../../../
-  - if [ "$PYTHON" == "/usr/bin/python" ]; then scons; fi
-
+  - if [ "$TRAVIS_PYTHON_VERSION" == "2.7" ]; then scons; fi
