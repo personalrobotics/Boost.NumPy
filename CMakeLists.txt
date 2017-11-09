@@ -76,8 +76,8 @@ endif()
 # In some cases, you may need to explicitly specify that a dynamic Boost is used; if so use:
 # add_definitions( -DBOOST_ALL_DYN_LINK )
 
-# We use different target names for Python 2 and 3 to enable to install
-# boost_numpy for both of Python 2 and 3.
+# We build Boost.NumPy as different package per different Python major version
+# (2 or 3) to enable to install two Boost.NumPy packages of Python 2 and 3.
 if(${PYTHON_VERSION_STRING} GREATER 3.0)
   set(boost_numpy_target boost_python3_numpy)
   set(boost_numpy_package BoostPython3Numpy)
