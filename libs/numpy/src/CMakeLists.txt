@@ -1,4 +1,4 @@
-add_library(boost_numpy ${LIBRARY_TYPE}
+add_library(${boost_numpy_target} ${LIBRARY_TYPE}
   # header files
   ../../../boost/numpy/dtype.hpp
   ../../../boost/numpy/internal.hpp
@@ -17,13 +17,13 @@ add_library(boost_numpy ${LIBRARY_TYPE}
   ufunc.cpp
   numpy.cpp
 )
-target_link_libraries(boost_numpy
+target_link_libraries(${boost_numpy_target}
   ${Boost_LIBRARIES}
   ${PYTHON_LIBRARIES}
 )
 
-install(TARGETS boost_numpy 
-  EXPORT "${PROJECT_NAME}Targets"
+install(TARGETS ${boost_numpy_target}
+  EXPORT "${boost_numpy_target}Targets"
   ARCHIVE DESTINATION lib${LIB_SUFFIX}
   LIBRARY DESTINATION lib${LIB_SUFFIX}
   PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE

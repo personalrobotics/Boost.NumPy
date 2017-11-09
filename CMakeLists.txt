@@ -76,11 +76,21 @@ endif()
 # In some cases, you may need to explicitly specify that a dynamic Boost is used; if so use:
 # add_definitions( -DBOOST_ALL_DYN_LINK )
 
-# Variable controlling whether the boost_numpy is a shared or static library.
-if (WIN32)
-  set(LIBRARY_TYPE STATIC CACHE STRING "type of library to make for boost_numpy")
+# We use different target names for Python 2 and 3 to enable to install
+# boost_numpy for both of Python 2 and 3.
+if(${PYTHON_VERSION_STRING} GREATER 3.0)
+  set(boost_numpy_target boost_python3_numpy)
+  set(boost_numpy_package BoostPython3Numpy)
 else()
-  set(LIBRARY_TYPE SHARED CACHE STRING "type of library to make for boost_numpy")
+  set(boost_numpy_target boost_python2_numpy)
+  set(boost_numpy_package BoostPython2Numpy)
+endif()
+
+# Variable controlling whether the ${boost_numpy_target} is a shared or static library.
+if (WIN32)
+  set(LIBRARY_TYPE STATIC CACHE STRING "type of library to make for ${boost_numpy_target}")
+else()
+  set(LIBRARY_TYPE SHARED CACHE STRING "type of library to make for ${boost_numpy_target}")
 endif()
 
 # Variable controlling building of documentation.
@@ -164,21 +174,21 @@ set(LIB_INSTALL_DIR lib/ CACHE PATH
 
 include(CMakePackageConfigHelpers)
 configure_package_config_file(cmake/BoostNumpyConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyConfig.cmake
-    INSTALL_DESTINATION ${LIB_INSTALL_DIR}/BoostNumpy/cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${boost_numpy_package}Config.cmake
+    INSTALL_DESTINATION ${LIB_INSTALL_DIR}/${boost_numpy_package}/cmake
     PATH_VARS INCLUDE_INSTALL_DIR LIB_INSTALL_DIR)
 write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyConfigVersion.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/${boost_numpy_package}ConfigVersion.cmake
     VERSION 0.24.0
     COMPATIBILITY SameMajorVersion)
 
-install(EXPORT "${PROJECT_NAME}Targets"
-        FILE "BoostNumpyTargets.cmake"
-        DESTINATION "${LIB_INSTALL_DIR}/BoostNumpy/cmake")
+install(EXPORT "${boost_numpy_target}Targets"
+        FILE "${boost_numpy_package}Targets.cmake"
+        DESTINATION "${LIB_INSTALL_DIR}/${boost_numpy_package}/cmake")
 
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyConfig.cmake
-              ${CMAKE_CURRENT_BINARY_DIR}/BoostNumpyConfigVersion.cmake
-        DESTINATION ${LIB_INSTALL_DIR}/BoostNumpy/cmake)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${boost_numpy_package}Config.cmake
+              ${CMAKE_CURRENT_BINARY_DIR}/${boost_numpy_package}ConfigVersion.cmake
+        DESTINATION ${LIB_INSTALL_DIR}/${boost_numpy_package}/cmake)
 
 # Building a package with CPack.
 set(CPACK_PACKAGE_NAME boost-numpy)
