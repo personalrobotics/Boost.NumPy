@@ -5,4 +5,4 @@ set(BoostNumpy_VERSION x.y.z)
 set_and_check(BoostNumpy_INCLUDE_DIR "@PACKAGE_INCLUDE_INSTALL_DIR@")
 set(BoostNumpy_INCLUDE_DIRS ${BoostNumpy_INCLUDE_DIR})
 
-include("${CMAKE_CURRENT_LIST_DIR}/BoostNumpyTargets.cmake")
+include("${CMAKE_CURRENT_LIST_DIR}/@boost_numpy_package@Targets.cmake")
