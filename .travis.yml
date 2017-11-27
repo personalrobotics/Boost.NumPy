@@ -1,13 +1,12 @@
 sudo: required
 dist: trusty
-language: cpp
+language: python
 
 python:
   - "2.7"
   - "3.4"
 
 before_install:
-  - export PATH=$(echo $PATH | tr ':' "\n" | sed '/\/opt\/python/d' | tr "\n" ":" | sed "s|::|:|g")
   - sudo apt-get -qq update
   - sudo apt-get install -y libboost-python-dev python-numpy python3-numpy libpython-dev libpython3-dev python-sphinx
 
